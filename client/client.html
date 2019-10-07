@@ -34,10 +34,25 @@ const handleResponse = (xhr, parseResponse) => {
     //if we are expecting a response body (not in a head request)
     if(parseResponse) {
         //parse the object and print it to the console
-        const obj = JSON.parse(xhr.response);
+        console.log(xhr.responseURL);
+        const obj = JSON.parse(xhr.responseText);
         console.dir(obj);
+        console.dir(obj.users);
         
-        content.innerHTML += `<p>${xhr.response}</p>`;
+        //if message in response, add to screen
+      if(obj.message) {
+        const p = document.createElement('p');
+        p.textContent = `Message: ${obj.message}`;
+        content.appendChild(p);
+      }
+      
+      //if users in response, add to screen
+      if(obj.users) {
+        const userList = document.createElement('p');
+        const users = JSON.stringify(obj.users);
+        userList.textContent = users;
+        content.appendChild(userList);
+      }
     } else { 
         
         content.innerHTML += '<p>Meta Data Recieved</p>';
@@ -48,8 +63,23 @@ const handleResponse = (xhr, parseResponse) => {
 const requestUpdate = (e, form) =>{
     
     
-    const url = userForm.querySelector('#urlField').value;
-    const method = userForm.querySelector('#methodSelect').value;
+    if (form == nameForm)
+    {
+        const url = nameForm.getAttribute('action');
+        const method = nameForm.getAttribute('method');
+    }
+    else 
+    {
+    
+        const url = userForm.querySelector('#urlField').value;
+        const method = userForm.querySelector('#methodSelect').value;
+                
+    }   
+    
+    
+    const nameField = nameForm.querySelector('#nameField');
+    const ageField = nameForm.querySelector('#ageField');
+    
     
     const xhr = new XMLHttpRequest();
     xhr.open(method, url);
@@ -66,7 +96,10 @@ const requestUpdate = (e, form) =>{
         xhr.onload = () => handleResponse(xhr, false);
     }
     
-    xhr.send();
+    const formData = `name=${nameField.value}&age=${ageField.value}`;
+      
+    //send our request with the data
+    xhr.send(formData);
     
     e.preventDefault();
     return false;    
